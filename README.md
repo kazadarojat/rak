@@ -6,6 +6,7 @@ Rerana dirancang sebagai aplikasi statis yang dapat dijalankan melalui GitHub Pa
 
 **Aplikasi:** https://kazadarojat.github.io/rak/  
 **Repository:** https://github.com/kazadarojat/rak
+
 <img width="2124" height="740" alt="image" src="https://github.com/user-attachments/assets/60d26c61-3727-4a40-bf5f-7ad9254d5405" />
 
 
@@ -206,3 +207,8 @@ https://kazadarojat.github.io/rak/
 Saran, laporan bug, dan ide pengembangan dapat disampaikan melalui [GitHub Issues](https://github.com/kazadarojat/rak/issues) atau Pull Request.
 
 Saat mengembangkan fitur yang mengubah struktur data diary, pertahankan kompatibilitas dengan arsip JSON sebelumnya agar catatan lama tetap dapat dipulihkan.
+
+
+
+
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/47c95fa7-5787-471f-bb91-ad39f10b444c" />
