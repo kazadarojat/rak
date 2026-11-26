@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rerana : Reportase Asendatif Kontemplatif</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Variabel Tema Dinamis (Default: Mawar Lembut) */
+        :root {
+            --bg-page: #fdf4f6;
+            --bg-card: #ffffff;
+            --bg-input: #f8e6ea;
+            --bg-header: rgba(255, 255, 255, 0.85);
+            --border-card: #f0d3da;
+            --border-input: #e6bec8;
+            --text-primary: #3d1520;
+            --text-secondary: #662c3c;
+            --text-muted: #945365;
+            --accent-bg: #be123c;
+            --accent-hover: #9f1239;
+            --accent-text: #ffffff;
+            --badge-bg: #f8e6ea;
+            --badge-hover: #f0d3da;
+            --font-family: 'Inter', sans-serif;
+            --font-scale: 1;
+        }
+
+        html {
+            font-size: calc(16px * var(--font-scale));
+            font-family: var(--font-family);
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+        }
+
+        /* Penerapan Variabel ke Elemen UI */
+        .theme-header {
+            background-color: var(--bg-header) !important;
+            border-color: var(--border-card) !important;
+        }
+        .theme-card {
+            background-color: var(--bg-card) !important;
+            border-color: var(--border-card) !important;
+        }
+        .theme-input {
+            background-color: var(--bg-input) !important;
+            border-color: var(--border-input) !important;
+            color: var(--text-primary) !important;
+        }
+        .theme-input::placeholder {
+            color: var(--text-muted) !important;
+            opacity: 0.75;
+        }
+        .theme-text-primary { color: var(--text-primary) !important; }
+        .theme-text-secondary { color: var(--text-secondary) !important; }
+        .theme-text-muted { color: var(--text-muted) !important; }
+        .theme-border-sub { border-color: var(--border-input) !important; }
+        .theme-btn-accent {
+            background-color: var(--accent-bg) !important;
+            color: var(--accent-text) !important;
+        }
+        .theme-btn-accent:hover {
+            background-color: var(--accent-hover) !important;
+        }
+        .theme-badge {
+            background-color: var(--badge-bg) !important;
+            color: var(--text-secondary) !important;
+            border-color: var(--border-input) !important;
+        }
+        .theme-badge:hover {
+            background-color: var(--badge-hover) !important;
+        }
+        input[type="date"], input[type="time"] {
+            color-scheme: var(--color-scheme, light);
+        }
+
+        /* Membuat semua sudut kotak, tombol, input, dan kartu menjadi lancip/siku */
+        section, input, textarea, select, button, .theme-card, .theme-input, .theme-badge, .theme-btn-accent {
+            border-radius: 0px !important;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        stone: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            300: '#d6d3d1',
+                            400: '#a8a29e',
+                            500: '#78716c',
+                            600: '#57534e',
+                            700: '#44403c',
+                            800: '#292524',
+                            900: '#1c1917',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="antialiased selection:bg-stone-300 selection:text-stone-900">
+
+    <!-- Notifikasi Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="theme-btn-accent px-4 py-3 shadow-lg text-sm font-medium flex items-center gap-2">
+            <span id="toast-icon">✅</span>
+            <span id="toast-message">Berhasil disimpan!</span>
+        </div>
+    </div>
+
+    <!-- Modal Pengaturan Tampilan (Tema, Font, Ukuran) -->
+    <div id="appearance-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="theme-card max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl border overflow-hidden">
+            <div class="p-5 border-b theme-border-sub flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold theme-text-primary flex items-center gap-2">
+                        <span>🎨</span>
+                        <span>Tampilan & Tipografi</span>
+                    </h2>
+                    <p class="text-xs theme-text-muted">Sesuaikan suasana membaca dan menulis jurnal Anda</p>
+                </div>
+                <button onclick="toggleAppearanceModal()" class="p-2 theme-text-muted hover:opacity-75 transition">
+                    ✕
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-6">
+                <!-- Pilihan Tema Warna -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider theme-text-muted mb-3">Pilihan Tema Warna</label>
+                    <div id="theme-options" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <!-- Opsi tema dirender lewat JS -->
+                    </div>
+                </div>
+
+                <!-- Pilihan Jenis Font -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider theme-text-muted mb-3">Gaya Huruf (Font)</label>
+                    <div id="font-options" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <!-- Opsi font dirender lewat JS -->
+                    </div>
+                </div>
+
+                <!-- Pilihan Ukuran Teks -->
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-xs font-bold uppercase tracking-wider theme-text-muted">Ukuran Teks</label>
+                        <span id="size-label" class="text-xs font-semibold theme-text-primary">Normal (100%)</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button type="button" onclick="setFontSize('small')" data-size="small" class="size-btn py-2 px-3 border text-xs font-medium transition theme-badge">Kecil</button>
+                        <button type="button" onclick="setFontSize('normal')" data-size="normal" class="size-btn py-2 px-3 border text-sm font-medium transition theme-badge">Normal</button>
+                        <button type="button" onclick="setFontSize('large')" data-size="large" class="size-btn py-2 px-3 border text-base font-medium transition theme-badge">Besar</button>
+                        <button type="button" onclick="setFontSize('xlarge')" data-size="xlarge" class="size-btn py-2 px-3 border text-lg font-medium transition theme-badge">Ekstra</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t theme-border-sub flex justify-between items-center">
+                <button onclick="resetAppearance()" class="text-xs font-medium theme-text-muted hover:underline">Reset ke Default</button>
+                <button onclick="toggleAppearanceModal()" class="px-4 py-2 text-xs font-semibold theme-btn-accent transition">Selesai</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Riwayat / Arsip -->
+    <div id="history-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
+        <div class="theme-card max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border overflow-hidden">
+            <div class="p-5 border-b theme-border-sub flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold theme-text-primary">Arsip Catatan Harian</h2>
+                    <p class="text-xs theme-text-muted">Pilih tanggal untuk melihat atau mengedit catatan</p>
+                </div>
+                <button onclick="toggleHistoryModal()" class="p-2 theme-text-muted hover:opacity-75 transition">
+                    ✕
+                </button>
+            </div>
+            <div id="history-list" class="p-5 overflow-y-auto space-y-2.5 flex-1">
+                <!-- Daftar riwayat akan dimuat di sini -->
+            </div>
+            <div class="p-4 border-t theme-border-sub flex justify-between items-center text-xs theme-text-muted">
+                <span id="total-entries">0 Catatan tersimpan</span>
+                <button onclick="exportAllJSON()" class="theme-text-primary font-medium hover:underline">Unduh Cadangan (.json)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Navigasi -->
+    <header class="sticky top-0 z-30 theme-header backdrop-blur-md border-b">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 theme-btn-accent flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+                    📓
+                </div>
+                <div class="truncate">
+                    <h1 class="font-bold theme-text-primary text-base sm:text-lg leading-tight truncate">Rerana</h1>
+                    <p class="text-[11px] theme-text-muted hidden sm:block truncate">Reportase Asendatif Kontemplatif</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <button onclick="toggleAppearanceModal()" title="Ubah Tema & Font" class="px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-medium theme-badge border transition flex items-center gap-1.5">
+                    <span>🎨</span>
+                    <span class="hidden md:inline">Tampilan</span>
+                </button>
+                <button onclick="toggleHistoryModal()" class="px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-medium theme-badge border transition flex items-center gap-1.5">
+                    <span>🗂️</span>
+                    <span class="hidden sm:inline">Riwayat</span>
+                </button>
+                <button onclick="copyFormattedText()" class="px-2.5 sm:px-3 py-2 text-xs sm:text-sm font-medium theme-card theme-text-secondary border theme-border-sub hover:opacity-80 transition flex items-center gap-1.5 shadow-sm">
+                    <span>📋</span>
+                    <span class="hidden md:inline">Salin Teks</span>
+                </button>
+                <button onclick="saveEntry(true)" class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium theme-btn-accent transition flex items-center gap-1.5 shadow-sm">
+                    <span>💾</span>
+                    <span>Simpan</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+
+        <!-- Bagian 1: Identitas Waktu & Tidur -->
+        <section class="theme-card p-5 sm:p-6 border shadow-sm space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b theme-border-sub pb-4">
+                <div>
+                    <h2 class="text-xs font-bold uppercase tracking-wider theme-text-muted">Waktu & Istirahat</h2>
+                </div>
+                <button onclick="setToday()" class="self-start sm:self-auto text-xs font-medium theme-badge border px-2.5 py-1 transition">
+                    Hari Ini
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Tanggal -->
+                <div>
+                    <label for="tanggal" class="block text-xs font-semibold theme-text-secondary mb-1.5">Tanggal</label>
+                    <input type="date" id="tanggal" onchange="onDateChange()" class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition">
+                </div>
+
+                <!-- Hari -->
+                <div>
+                    <label for="hari" class="block text-xs font-semibold theme-text-secondary mb-1.5">Hari</label>
+                    <select id="hari" class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition cursor-pointer">
+                        <option value="Senin">Senin</option>
+                        <option value="Selasa">Selasa</option>
+                        <option value="Rabu">Rabu</option>
+                        <option value="Kamis">Kamis</option>
+                        <option value="Jumat">Jumat</option>
+                        <option value="Sabtu">Sabtu</option>
+                        <option value="Minggu">Minggu</option>
+                    </select>
+                </div>
+
+                <!-- Bangun Tidur -->
+                <div>
+                    <label for="bangun" class="block text-xs font-semibold theme-text-secondary mb-1.5">🛌 Bangun Tidur</label>
+                    <input type="time" id="bangun" class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition">
+                </div>
+
+                <!-- Tidur Malam -->
+                <div>
+                    <label for="tidur" class="block text-xs font-semibold theme-text-secondary mb-1.5">🛌 Tidur</label>
+                    <input type="time" id="tidur" class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition">
+                </div>
+            </div>
+
+            <!-- Kondisi Fisik -->
+            <div>
+                <label for="kondisi_fisik" class="block text-xs font-semibold theme-text-secondary mb-2">🩺 Kondisi Fisik</label>
+                <div class="flex flex-wrap gap-2 mb-2.5">
+                    <button type="button" onclick="selectPhysical('💪 Bugar & Sehat')" class="px-3 py-1.5 text-xs theme-badge border transition">💪 Bugar</button>
+                    <button type="button" onclick="selectPhysical('🙂 Cukup Fit')" class="px-3 py-1.5 text-xs theme-badge border transition">🙂 Cukup Fit</button>
+                    <button type="button" onclick="selectPhysical('🥱 Lelah / Pegal')" class="px-3 py-1.5 text-xs theme-badge border transition">🥱 Lelah / Pegal</button>
+                    <button type="button" onclick="selectPhysical('🤕 Pusing / Kurang Tidur')" class="px-3 py-1.5 text-xs theme-badge border transition">🤕 Pusing</button>
+                    <button type="button" onclick="selectPhysical('🤒 Kurang Enak Badan')" class="px-3 py-1.5 text-xs theme-badge border transition">🤒 Kurang Enak Badan</button>
+                </div>
+                <input type="text" id="kondisi_fisik" placeholder="Catat kondisi tubuh hari ini (misal: bugar, pegal setelah olahraga, flu)..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition">
+            </div>
+
+            <!-- Mimpi -->
+            <div>
+                <label for="mimpi" class="block text-xs font-semibold theme-text-secondary mb-1.5">💡 Mimpi</label>
+                <textarea id="mimpi" rows="2" placeholder="Catat bunga tidur semalam..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+            </div>
+        </section>
+
+        <!-- Bagian 2: Konsumsi Harian -->
+        <section class="theme-card p-5 sm:p-6 border shadow-sm space-y-4">
+            <h2 class="text-xs font-bold uppercase tracking-wider theme-text-muted border-b theme-border-sub pb-3">Konsumsi & Asupan</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="breakfast" class="block text-xs font-semibold theme-text-secondary mb-1.5">🍳 Breakfast</label>
+                    <input type="text" id="breakfast" placeholder="Menu sarapan..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition">
+                </div>
+                <div>
+                    <label for="lunch" class="block text-xs font-semibold theme-text-secondary mb-1.5">🕛 Lunch</label>
+                    <input type="text" id="lunch" placeholder="Menu makan siang..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition">
+                </div>
+                <div>
+                    <label for="dinner" class="block text-xs font-semibold theme-text-secondary mb-1.5">🍴 Dinner</label>
+                    <input type="text" id="dinner" placeholder="Menu makan malam..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition">
+                </div>
+            </div>
+        </section>
+
+        <!-- Bagian 3: Mobilitas, Sosial & Mood -->
+        <section class="theme-card p-5 sm:p-6 border shadow-sm space-y-4">
+            <h2 class="text-xs font-bold uppercase tracking-wider theme-text-muted border-b theme-border-sub pb-3">Mobilitas, Relasi & Suasana Hati</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Tempat Mana Aja -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label for="tempat" class="block text-xs font-semibold theme-text-secondary">🏛️ Tempat Mana Aja</label>
+                        <button type="button" onclick="appendTag('tempat', 'Dekanat')" class="text-[11px] font-medium theme-badge border px-2 py-0.5 transition">
+                            + Dekanat
+                        </button>
+                    </div>
+                    <textarea id="tempat" rows="2" placeholder="Contoh: Dekanat, Perpustakaan, Kafe..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+
+                <!-- Bertemu Lama -->
+                <div>
+                    <label for="bertemu" class="block text-xs font-semibold theme-text-secondary mb-2">👥 Bertemu Lama</label>
+                    <textarea id="bertemu" rows="2" placeholder="Siapa saja yang ditemui dan berbincang lama hari ini?" class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+            </div>
+
+            <!-- Mood -->
+            <div class="pt-1">
+                <label for="mood" class="block text-xs font-semibold theme-text-secondary mb-2">😶‍🌫️ Mood</label>
+                <div class="flex flex-wrap gap-2 mb-2.5">
+                    <button type="button" onclick="selectMood('😊 Senang & Bersemangat')" class="mood-btn px-3 py-1.5 text-xs theme-badge border transition">😊 Senang</button>
+                    <button type="button" onclick="selectMood('😌 Tenang & Damai')" class="mood-btn px-3 py-1.5 text-xs theme-badge border transition">😌 Tenang</button>
+                    <button type="button" onclick="selectMood('🤔 Kontemplatif / Mikir')" class="mood-btn px-3 py-1.5 text-xs theme-badge border transition">🤔 Kontemplatif</button>
+                    <button type="button" onclick="selectMood('🥱 Lelah / Mengantuk')" class="mood-btn px-3 py-1.5 text-xs theme-badge border transition">🥱 Lelah</button>
+                    <button type="button" onclick="selectMood('😶‍🌫️ Campur Aduk / Bingung')" class="mood-btn px-3 py-1.5 text-xs theme-badge border transition">😶‍🌫️ Campur Aduk</button>
+                    <button type="button" onclick="selectMood('😤 Stres / Tertekan')" class="mood-btn px-3 py-1.5 text-xs theme-badge border transition">😤 Stres</button>
+                </div>
+                <input type="text" id="mood" placeholder="Gambarkan perasaanmu hari ini..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition">
+            </div>
+        </section>
+
+        <!-- Bagian 4: Produktivitas & Finansial -->
+        <section class="theme-card p-5 sm:p-6 border shadow-sm space-y-4">
+            <h2 class="text-xs font-bold uppercase tracking-wider theme-text-muted border-b theme-border-sub pb-3">Produktivitas & Finansial</h2>
+            
+            <div>
+                <label for="kuliah" class="block text-xs font-semibold theme-text-secondary mb-1.5">🎓 Kuliah Hari Ini</label>
+                <textarea id="kuliah" rows="2" placeholder="Daftar mata kuliah yang diikuti hari ini..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="belajar" class="block text-xs font-semibold theme-text-secondary mb-1.5">📖 Belajar</label>
+                    <textarea id="belajar" rows="2" placeholder="Materi, buku, atau hal baru yang dipelajari..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+                <div>
+                    <label for="projek" class="block text-xs font-semibold theme-text-secondary mb-1.5">🔬 Projek</label>
+                    <textarea id="projek" rows="2" placeholder="Progres riset, tugas, atau proyek hari ini..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+                <div>
+                    <label for="beli" class="block text-xs font-semibold theme-text-secondary mb-1.5">🧺 Beli apa Aja</label>
+                    <textarea id="beli" rows="2" placeholder="Daftar barang/makanan yang dibeli..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+                <div>
+                    <label for="pengeluaran" class="block text-xs font-semibold theme-text-secondary mb-1.5">💵 Pengeluaran</label>
+                    <textarea id="pengeluaran" rows="2" placeholder="Rincian atau total pengeluaran (misal: Rp 45.000)..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bagian 5: Pemikiran & Perencanaan -->
+        <section class="theme-card p-5 sm:p-6 border shadow-sm space-y-4">
+            <h2 class="text-xs font-bold uppercase tracking-wider theme-text-muted border-b theme-border-sub pb-3">Intisari, Pemikiran & Rencana</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="highlight" class="block text-xs font-semibold theme-text-secondary mb-1.5">🧬 Highlight</label>
+                    <textarea id="highlight" rows="2" placeholder="Momen paling berkesan atau utama hari ini..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+                <div>
+                    <label for="insight" class="block text-xs font-semibold theme-text-secondary mb-1.5">💡 Insight</label>
+                    <textarea id="insight" rows="2" placeholder="Pelajaran hidup atau kesadaran baru yang didapat..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+                <div>
+                    <label for="ide" class="block text-xs font-semibold theme-text-secondary mb-1.5">✨ Ide</label>
+                    <textarea id="ide" rows="2" placeholder="Gagasan spontan yang muncul..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+                <div>
+                    <label for="pertanyaan" class="block text-xs font-semibold theme-text-secondary mb-1.5">❓ Pertanyaan</label>
+                    <textarea id="pertanyaan" rows="2" placeholder="Hal yang masih mengganjal atau ingin dicari jawabannya..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+            </div>
+
+            <div class="pt-1">
+                <label for="plan_besok" class="block text-xs font-semibold theme-text-secondary mb-1.5">⏭️ Plan Besok</label>
+                <textarea id="plan_besok" rows="2" placeholder="Prioritas dan rencana kegiatan untuk esok hari..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+            </div>
+        </section>
+
+        <!-- Bagian 6: Reportase Asendatif Kontemplatif (R.A.K.) -->
+        <section class="theme-card p-5 sm:p-6 border shadow-sm space-y-4">
+            <div class="border-b theme-border-sub pb-3">
+                <h2 class="text-sm font-bold theme-text-primary flex items-center gap-2">
+                    <span>📖</span>
+                    <span>Reportase Asendatif Kontemplatif (R.A.K.)</span>
+                </h2>
+                <p class="text-xs theme-text-muted mt-0.5">Hari ini kisahku — tuliskan narasi perjalanan batin dan peristiwa hari ini secara mendalam.</p>
+            </div>
+            <div>
+                <textarea id="rak" rows="6" placeholder="Hari ini kisahku dimulai dari..." class="theme-input w-full px-4 py-3 border text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                <div class="flex justify-end items-center gap-3 mt-1.5 text-[11px] theme-text-muted font-medium">
+                    <span id="rak-word-count">0 kata</span>
+                    <span>•</span>
+                    <span id="rak-char-count">0 karakter</span>
+                </div>
+            </div>
+
+            <!-- Evaluasi Harian: Berhasil & Kurang -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t theme-border-sub">
+                <div>
+                    <label for="berhasil_hari_ini" class="block text-xs font-semibold theme-text-secondary mb-1.5">🏆 Apa yang Berhasil Hari Ini</label>
+                    <textarea id="berhasil_hari_ini" rows="3" placeholder="Pencapaian, kebiasaan baik, atau hal yang berjalan sesuai rencana..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+                <div>
+                    <label for="kurang_hari_ini" class="block text-xs font-semibold theme-text-secondary mb-1.5">⚠️ Yang Kurang di Hari Ini</label>
+                    <textarea id="kurang_hari_ini" rows="3" placeholder="Hal yang terlewat, hambatan, atau bagian yang perlu diperbaiki..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition resize-y"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bagian 7: Gratitude (3 Hal) -->
+        <section class="theme-card p-5 sm:p-6 border shadow-sm space-y-4">
+            <div class="border-b theme-border-sub pb-3">
+                <h2 class="text-sm font-bold theme-text-primary flex items-center gap-2">
+                    <span>❤️</span>
+                    <span>Gratitude (3 hal)</span>
+                </h2>
+                <p class="text-xs theme-text-muted mt-0.5">Hal yang Bikin Bersyukur hari ini</p>
+            </div>
+            <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-6 h-6 theme-badge border text-xs font-bold flex items-center justify-center shrink-0">1</span>
+                    <input type="text" id="gratitude_1" placeholder="Hal pertama yang disyukuri hari ini..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition">
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-6 h-6 theme-badge border text-xs font-bold flex items-center justify-center shrink-0">2</span>
+                    <input type="text" id="gratitude_2" placeholder="Hal kedua yang disyukuri hari ini..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition">
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-6 h-6 theme-badge border text-xs font-bold flex items-center justify-center shrink-0">3</span>
+                    <input type="text" id="gratitude_3" placeholder="Hal ketiga yang disyukuri hari ini..." class="theme-input w-full px-3.5 py-2.5 border text-sm focus:outline-none focus:ring-2 focus:ring-current/20 transition">
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Bar Bawah -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 pb-10">
+            <button type="button" onclick="clearForm()" class="w-full sm:w-auto px-4 py-2.5 text-xs font-medium text-rose-500 hover:bg-rose-500/10 transition">
+                Kosongkan Formulir
+            </button>
+            <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                <button type="button" onclick="copyFormattedText()" class="flex-1 sm:flex-none justify-center px-4 py-2.5 text-xs font-medium theme-card theme-text-secondary border theme-border-sub hover:opacity-80 transition flex items-center gap-2 shadow-sm">
+                    <span>📋</span>
+                    <span>Salin Format Teks</span>
+                </button>
+                <button type="button" onclick="saveEntry(true)" class="flex-1 sm:flex-none justify-center px-6 py-2.5 text-xs font-semibold theme-btn-accent transition flex items-center gap-2 shadow-sm">
+                    <span>💾</span>
+                    <span>Simpan Catatan</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const STORAGE_KEY = 'daily_journal_rak_v1';
+        const APPEARANCE_KEY = 'daily_journal_appearance_v1';
+        const HARI_INDO = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+        // Konfigurasi Pilihan Tema
+        const THEMES = {
+            stone: {
+                name: 'Kertas Hangat',
+                swatch: '#fafaf9',
+                accent: '#292524',
+                scheme: 'light',
+                vars: {
+                    '--bg-page': '#fafaf9',
+                    '--bg-card': '#ffffff',
+                    '--bg-input': '#f5f5f4',
+                    '--bg-header': 'rgba(255, 255, 255, 0.85)',
+                    '--border-card': 'rgba(231, 229, 228, 0.9)',
+                    '--border-input': '#e7e5e4',
+                    '--text-primary': '#1c1917',
+                    '--text-secondary': '#57534e',
+                    '--text-muted': '#78716c',
+                    '--accent-bg': '#292524',
+                    '--accent-hover': '#1c1917',
+                    '--accent-text': '#ffffff',
+                    '--badge-bg': '#f5f5f4',
+                    '--badge-hover': '#e7e5e4'
+                }
+            },
+            sepia: {
+                name: 'Sepia Klasik',
+                swatch: '#f5efe6',
+                accent: '#78350f',
+                scheme: 'light',
+                vars: {
+                    '--bg-page': '#f4ecd8',
+                    '--bg-card': '#fbf7ee',
+                    '--bg-input': '#efe5cf',
+                    '--bg-header': 'rgba(251, 247, 238, 0.88)',
+                    '--border-card': '#e0d3b8',
+                    '--border-input': '#d8c7a6',
+                    '--text-primary': '#3e2c1c',
+                    '--text-secondary': '#5c432d',
+                    '--text-muted': '#85684b',
+                    '--accent-bg': '#78350f',
+                    '--accent-hover': '#5c280b',
+                    '--accent-text': '#fffbeb',
+                    '--badge-bg': '#efe5cf',
+                    '--badge-hover': '#e3d4b4'
+                }
+            },
+            dark: {
+                name: 'Malam Gelap',
+                swatch: '#18181b',
+                accent: '#e4e4e7',
+                scheme: 'dark',
+                vars: {
+                    '--bg-page': '#121214',
+                    '--bg-card': '#1c1c1f',
+                    '--bg-input': '#27272a',
+                    '--bg-header': 'rgba(28, 28, 31, 0.85)',
+                    '--border-card': '#2e2e33',
+                    '--border-input': '#3f3f46',
+                    '--text-primary': '#f4f4f5',
+                    '--text-secondary': '#d4d4d8',
+                    '--text-muted': '#a1a1aa',
+                    '--accent-bg': '#f4f4f5',
+                    '--accent-hover': '#ffffff',
+                    '--accent-text': '#18181b',
+                    '--badge-bg': '#27272a',
+                    '--badge-hover': '#3f3f46'
+                }
+            },
+            midnight: {
+                name: 'Biru Tengah Malam',
+                swatch: '#0f172a',
+                accent: '#38bdf8',
+                scheme: 'dark',
+                vars: {
+                    '--bg-page': '#0b1120',
+                    '--bg-card': '#131c31',
+                    '--bg-input': '#1e293b',
+                    '--bg-header': 'rgba(19, 28, 49, 0.85)',
+                    '--border-card': '#24324d',
+                    '--border-input': '#334155',
+                    '--text-primary': '#f1f5f9',
+                    '--text-secondary': '#cbd5e1',
+                    '--text-muted': '#94a3b8',
+                    '--accent-bg': '#0284c7',
+                    '--accent-hover': '#0369a1',
+                    '--accent-text': '#ffffff',
+                    '--badge-bg': '#1e293b',
+                    '--badge-hover': '#334155'
+                }
+            },
+            sage: {
+                name: 'Hutan Teduh',
+                swatch: '#f2f7f4',
+                accent: '#166534',
+                scheme: 'light',
+                vars: {
+                    '--bg-page': '#f1f6f3',
+                    '--bg-card': '#ffffff',
+                    '--bg-input': '#e6efe9',
+                    '--bg-header': 'rgba(255, 255, 255, 0.85)',
+                    '--border-card': '#d1e2d7',
+                    '--border-input': '#bfd6c7',
+                    '--text-primary': '#143322',
+                    '--text-secondary': '#2d523d',
+                    '--text-muted': '#557a65',
+                    '--accent-bg': '#15803d',
+                    '--accent-hover': '#166534',
+                    '--accent-text': '#ffffff',
+                    '--badge-bg': '#e6efe9',
+                    '--badge-hover': '#d5e4da'
+                }
+            },
+            ocean: {
+                name: 'Angin Laut',
+                swatch: '#f0f7ff',
+                accent: '#0369a1',
+                scheme: 'light',
+                vars: {
+                    '--bg-page': '#f0f7ff',
+                    '--bg-card': '#ffffff',
+                    '--bg-input': '#e2effc',
+                    '--bg-header': 'rgba(255, 255, 255, 0.85)',
+                    '--border-card': '#cde2f7',
+                    '--border-input': '#b8d6f3',
+                    '--text-primary': '#0c2d48',
+                    '--text-secondary': '#274c6b',
+                    '--text-muted': '#537796',
+                    '--accent-bg': '#0369a1',
+                    '--accent-hover': '#075985',
+                    '--accent-text': '#ffffff',
+                    '--badge-bg': '#e2effc',
+                    '--badge-hover': '#cfe4fa'
+                }
+            },
+            lavender: {
+                name: 'Senja Lavender',
+                swatch: '#f7f5ff',
+                accent: '#6d28d9',
+                scheme: 'light',
+                vars: {
+                    '--bg-page': '#f6f4fc',
+                    '--bg-card': '#ffffff',
+                    '--bg-input': '#ece8f8',
+                    '--bg-header': 'rgba(255, 255, 255, 0.85)',
+                    '--border-card': '#ddd6f3',
+                    '--border-input': '#cec3ed',
+                    '--text-primary': '#241744',
+                    '--text-secondary': '#453370',
+                    '--text-muted': '#6d5b99',
+                    '--accent-bg': '#6d28d9',
+                    '--accent-hover': '#5b21b6',
+                    '--accent-text': '#ffffff',
+                    '--badge-bg': '#ece8f8',
+                    '--badge-hover': '#dfd9f3'
+                }
+            },
+            rose: {
+                name: 'Mawar Lembut',
+                swatch: '#fff5f7',
+                accent: '#be123c',
+                scheme: 'light',
+                vars: {
+                    '--bg-page': '#fdf4f6',
+                    '--bg-card': '#ffffff',
+                    '--bg-input': '#f8e6ea',
+                    '--bg-header': 'rgba(255, 255, 255, 0.85)',
+                    '--border-card': '#f0d3da',
+                    '--border-input': '#e6bec8',
+                    '--text-primary': '#3d1520',
+                    '--text-secondary': '#662c3c',
+                    '--text-muted': '#945365',
+                    '--accent-bg': '#be123c',
+                    '--accent-hover': '#9f1239',
+                    '--accent-text': '#ffffff',
+                    '--badge-bg': '#f8e6ea',
+                    '--badge-hover': '#f0d3da'
+                }
+            }
+        };
+
+        // Konfigurasi Pilihan Font
+        const FONTS = {
+            inter: { name: 'Inter (Modern Bersih)', family: "'Inter', sans-serif", sample: 'Abc 123' },
+            jakarta: { name: 'Plus Jakarta (Rapi)', family: "'Plus Jakarta Sans', sans-serif", sample: 'Abc 123' },
+            dmsans: { name: 'DM Sans (Geometris)', family: "'DM Sans', sans-serif", sample: 'Abc 123' },
+            nunito: { name: 'Nunito (Lembut)', family: "'Nunito', sans-serif", sample: 'Abc 123' },
+            lora: { name: 'Lora (Sastra / Buku)', family: "'Lora', serif", sample: 'Abc 123' },
+            merriweather: { name: 'Merriweather (Klasik)', family: "'Merriweather', serif", sample: 'Abc 123' },
+            crimson: { name: 'Crimson Pro (Editorial)', family: "'Crimson Pro', serif", sample: 'Abc 123' },
+            playfair: { name: 'Playfair Display (Elegan)', family: "'Playfair Display', serif", sample: 'Abc 123' },
+            mono: { name: 'JetBrains (Catatan Kode)', family: "'JetBrains Mono', monospace", sample: 'Abc 123' },
+            spacemono: { name: 'Space Mono (Mesin Tik)', family: "'Space Mono', monospace", sample: 'Abc 123' }
+        };
+
+        // Konfigurasi Skala Ukuran
+        const SIZES = {
+            small: { label: 'Kecil (90%)', scale: 0.9 },
+            normal: { label: 'Normal (100%)', scale: 1.0 },
+            large: { label: 'Besar (110%)', scale: 1.1 },
+            xlarge: { label: 'Ekstra (120%)', scale: 1.2 }
+        };
+
+        let currentAppearance = {
+            theme: 'rose',
+            font: 'inter',
+            size: 'normal'
+        };
+        
+        // Daftar ID input yang akan disimpan
+        const FIELD_IDS = [
+            'tanggal', 'hari', 'bangun', 'kondisi_fisik', 'mimpi',
+            'breakfast', 'lunch', 'dinner',
+            'tempat', 'mood', 'bertemu',
+            'highlight', 'insight', 'ide', 'pertanyaan',
+            'kuliah', 'beli', 'pengeluaran', 'belajar', 'projek',
+            'tidur', 'plan_besok', 'rak',
+            'berhasil_hari_ini', 'kurang_hari_ini',
+            'gratitude_1', 'gratitude_2', 'gratitude_3'
+        ];
+
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            initAppearance();
+            setToday();
+
+            // Pasang auto-save pada semua input
+            FIELD_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', () => {
+                        if (id === 'rak') updateRakCounter();
+                        saveEntry(false);
+                    });
+                    el.addEventListener('change', () => {
+                        if (id === 'rak') updateRakCounter();
+                        saveEntry(false);
+                    });
+                }
+            });
+        });
+
+        // Hitung kata dan karakter pada kolom R.A.K.
+        function updateRakCounter() {
+            const rakEl = document.getElementById('rak');
+            const wordEl = document.getElementById('rak-word-count');
+            const charEl = document.getElementById('rak-char-count');
+            if (!rakEl || !wordEl || !charEl) return;
+
+            const text = rakEl.value;
+            const trimmed = text.trim();
+            const wordCount = trimmed ? trimmed.split(/\s+/).length : 0;
+            const charCount = text.length;
+
+            wordEl.textContent = `${wordCount} kata`;
+            charEl.textContent = `${charCount} karakter`;
+        }
+
+        // === LOGIKA PENGATURAN TAMPILAN ===
+        function initAppearance() {
+            try {
+                const saved = localStorage.getItem(APPEARANCE_KEY);
+                if (saved) {
+                    currentAppearance = { ...currentAppearance, ...JSON.parse(saved) };
+                }
+            } catch (e) {}
+            renderAppearanceControls();
+            applyAppearance();
+        }
+
+        function applyAppearance() {
+            const root = document.documentElement;
+            const themeObj = THEMES[currentAppearance.theme] || THEMES.rose;
+            const fontObj = FONTS[currentAppearance.font] || FONTS.inter;
+            const sizeObj = SIZES[currentAppearance.size] || SIZES.normal;
+
+            Object.entries(themeObj.vars).forEach(([key, val]) => {
+                root.style.setProperty(key, val);
+            });
+            root.style.setProperty('--color-scheme', themeObj.scheme);
+            root.style.setProperty('--font-family', fontObj.family);
+            root.style.setProperty('--font-scale', sizeObj.scale);
+
+            document.getElementById('size-label').textContent = sizeObj.label;
+
+            // Update status aktif tombol tema
+            document.querySelectorAll('.theme-choice-btn').forEach(btn => {
+                const isSelected = btn.dataset.theme === currentAppearance.theme;
+                btn.style.outline = isSelected ? `2px solid ${themeObj.accent}` : 'none';
+                btn.style.outlineOffset = '2px';
+            });
+
+            // Update status aktif tombol font
+            document.querySelectorAll('.font-choice-btn').forEach(btn => {
+                const isSelected = btn.dataset.font === currentAppearance.font;
+                btn.style.outline = isSelected ? `2px solid ${themeObj.accent}` : 'none';
+                btn.style.outlineOffset = '2px';
+            });
+
+            // Update status aktif tombol ukuran
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                const isSelected = btn.dataset.size === currentAppearance.size;
+                btn.style.outline = isSelected ? `2px solid ${themeObj.accent}` : 'none';
+                btn.style.outlineOffset = '2px';
+            });
+
+            try {
+                localStorage.setItem(APPEARANCE_KEY, JSON.stringify(currentAppearance));
+            } catch (e) {}
+        }
+
+        function renderAppearanceControls() {
+            const themeContainer = document.getElementById('theme-options');
+            themeContainer.innerHTML = Object.entries(THEMES).map(([key, t]) => `
+                <button type="button" onclick="setTheme('${key}')" data-theme="${key}" class="theme-choice-btn p-2.5 border theme-border-sub flex flex-col items-start gap-2 text-left transition hover:opacity-90" style="background-color: ${t.swatch};">
+                    <div class="flex items-center gap-1.5 w-full justify-between">
+                        <span class="w-4 h-4 rounded-full border border-black/15" style="background-color: ${t.accent};"></span>
+                        <span class="text-[10px] px-1.5 py-0.5 font-medium" style="background-color: ${t.accent}; color: ${t.vars['--accent-text']};">Aa</span>
+                    </div>
+                    <span class="text-xs font-semibold leading-tight" style="color: ${t.vars['--text-primary']};">${t.name}</span>
+                </button>
+            `).join('');
+
+            const fontContainer = document.getElementById('font-options');
+            fontContainer.innerHTML = Object.entries(FONTS).map(([key, f]) => `
+                <button type="button" onclick="setFont('${key}')" data-font="${key}" class="font-choice-btn p-3 border theme-badge flex items-center justify-between text-left transition" style="font-family: ${f.family};">
+                    <span class="text-xs font-semibold theme-text-primary">${f.name}</span>
+                    <span class="text-xs theme-text-muted">${f.sample}</span>
+                </button>
+            `).join('');
+        }
+
+        function setTheme(themeKey) {
+            currentAppearance.theme = themeKey;
+            applyAppearance();
+        }
+
+        function setFont(fontKey) {
+            currentAppearance.font = fontKey;
+            applyAppearance();
+        }
+
+        function setFontSize(sizeKey) {
+            currentAppearance.size = sizeKey;
+            applyAppearance();
+        }
+
+        function resetAppearance() {
+            currentAppearance = { theme: 'rose', font: 'inter', size: 'normal' };
+            applyAppearance();
+            showToast('Tampilan dikembalikan ke default', '🎨');
+        }
+
+        function toggleAppearanceModal() {
+            const modal = document.getElementById('appearance-modal');
+            modal.classList.toggle('hidden');
+        }
+        // === AKHIR LOGIKA PENGATURAN TAMPILAN ===
+
+        // Dapatkan tanggal lokal format YYYY-MM-DD
+        function getLocalDateString(dateObj = new Date()) {
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Format tanggal ke Bahasa Indonesia
+        function formatDateIndo(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            const bulan = [
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            return `${parseInt(parts[2], 10)} ${bulan[parseInt(parts[1], 10) - 1]} ${parts[0]}`;
+        }
+
+        // Set ke hari ini
+        function setToday() {
+            const todayStr = getLocalDateString();
+            document.getElementById('tanggal').value = todayStr;
+            onDateChange();
+        }
+
+        // Saat tanggal berubah
+        function onDateChange() {
+            const dateStr = document.getElementById('tanggal').value;
+            if (!dateStr) return;
+
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const dateObj = new Date(y, m - 1, d);
+            const dayName = HARI_INDO[dateObj.getDay()];
+
+            loadEntryByDate(dateStr, dayName);
+        }
+
+        // Ambil semua data dari localStorage
+        function getAllEntries() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                return raw ? JSON.parse(raw) : {};
+            } catch (e) {
+                console.error('Gagal membaca storage:', e);
+                return {};
+            }
+        }
+
+        // Muat catatan berdasarkan tanggal
+        function loadEntryByDate(dateStr, defaultDayName = '') {
+            const allEntries = getAllEntries();
+            const entry = allEntries[dateStr] || {};
+
+            FIELD_IDS.forEach(id => {
+                if (id === 'tanggal') return;
+                const el = document.getElementById(id);
+                if (!el) return;
+
+                if (id === 'hari') {
+                    el.value = entry.hari || defaultDayName || 'Senin';
+                } else {
+                    el.value = entry[id] || '';
+                }
+            });
+            updateRakCounter();
+        }
+
+        // Simpan catatan
+        function saveEntry(notify = true) {
+            const dateStr = document.getElementById('tanggal').value;
+            if (!dateStr) {
+                if (notify) showToast('Pilih tanggal terlebih dahulu!', '⚠️');
+                return;
+            }
+
+            const allEntries = getAllEntries();
+            const entryData = {};
+
+            FIELD_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                entryData[id] = el ? el.value : '';
+            });
+
+            allEntries[dateStr] = entryData;
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(allEntries));
+                if (notify) showToast('Catatan berhasil disimpan!', '💾');
+            } catch (e) {
+                if (notify) showToast('Gagal menyimpan ke penyimpanan lokal.', '❌');
+            }
+        }
+
+        // Kosongkan formulir untuk tanggal aktif
+        function clearForm() {
+            FIELD_IDS.forEach(id => {
+                if (id === 'tanggal' || id === 'hari') return;
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            updateRakCounter();
+            saveEntry(false);
+            showToast('Formulir dikosongkan', '🧹');
+        }
+
+        // Tambahkan tag ke textarea (misal: + Dekanat)
+        function appendTag(fieldId, tagText) {
+            const el = document.getElementById(fieldId);
+            if (!el) return;
+            const current = el.value.trim();
+            if (!current) {
+                el.value = tagText;
+            } else if (!current.toLowerCase().includes(tagText.toLowerCase())) {
+                el.value = `${current}, ${tagText}`;
+            }
+            saveEntry(false);
+        }
+
+        // Pilih cepat kondisi fisik
+        function selectPhysical(statusText) {
+            const el = document.getElementById('kondisi_fisik');
+            if (el) {
+                el.value = statusText;
+                saveEntry(false);
+            }
+        }
+
+        // Pilih cepat mood
+        function selectMood(moodText) {
+            const el = document.getElementById('mood');
+            if (el) {
+                el.value = moodText;
+                saveEntry(false);
+            }
+        }
+
+        // Salin format teks rapi ke clipboard
+        function copyFormattedText() {
+            const val = (id) => {
+                const el = document.getElementById(id);
+                return (el && el.value.trim()) ? el.value.trim() : '-';
+            };
+
+            const formatted = `Hari : ${val('hari')}
+Tanggal : ${formatDateIndo(document.getElementById('tanggal').value)}
+🛌 Bangun Tidur : ${val('bangun')}
+🩺 Kondisi Fisik : ${val('kondisi_fisik')}
+
+💡 Mimpi :
+${val('mimpi')}
+
+🍳 Breakfast : ${val('breakfast')}
+🕛 Lunch : ${val('lunch')}
+🍴 Dinner : ${val('dinner')}
+
+🏛️ Tempat Mana Aja :
+${val('tempat')}
+
+😶‍🌫️ Mood : ${val('mood')}
+
+👥 Bertemu Lama :
+${val('bertemu')}
+
+🧬 Highlight :
+${val('highlight')}
+
+💡 Insight :
+${val('insight')}
+
+✨ Ide :
+${val('ide')}
+
+❓ Pertanyaan :
+${val('pertanyaan')}
+
+🧺 Beli apa Aja :
+${val('beli')}
+
+💵 Pengeluaran :
+${val('pengeluaran')}
+
+🎓 Kuliah Hari Ini :
+${val('kuliah')}
+
+📖 Belajar :
+${val('belajar')}
+
+🔬 Projek :
+${val('projek')}
+
+🛌 Tidur : ${val('tidur')}
+
+⏭️ Plan Besok :
+${val('plan_besok')}
+
+📖 Reportase Asendatif Kontemplatif (R.A.K.)
+Hari ini kisahku :
+${val('rak')}
+
+🏆 Apa yang Berhasil Hari Ini :
+${val('berhasil_hari_ini')}
+
+⚠️ Yang Kurang di Hari Ini :
+${val('kurang_hari_ini')}
+
+❤️ Gratitude (3 hal) — Hal yang Bikin Bersyukur hari ini :
+1. ${val('gratitude_1')}
+2. ${val('gratitude_2')}
+3. ${val('gratitude_3')}`;
+
+            const textarea = document.createElement('textarea');
+            textarea.value = formatted;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Catatan berhasil disalin ke clipboard!', '📋');
+            } catch (err) {
+                showToast('Gagal menyalin teks.', '❌');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // Modal Riwayat
+        function toggleHistoryModal() {
+            const modal = document.getElementById('history-modal');
+            const isHidden = modal.classList.contains('hidden');
+            
+            if (isHidden) {
+                renderHistoryList();
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function renderHistoryList() {
+            const listEl = document.getElementById('history-list');
+            const countEl = document.getElementById('total-entries');
+            const allEntries = getAllEntries();
+            const dates = Object.keys(allEntries).sort((a, b) => b.localeCompare(a));
+
+            countEl.textContent = `${dates.length} Catatan tersimpan`;
+
+            if (dates.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-10 text-stone-400">
+                        <p class="text-2xl mb-2">📭</p>
+                        <p class="text-sm">Belum ada catatan harian yang tersimpan.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = dates.map(dateStr => {
+                const item = allEntries[dateStr];
+                const preview = item.highlight || item.rak || item.mood || 'Tidak ada ringkasan...';
+                return `
+                    <div class="p-3.5 border theme-badge transition flex items-center justify-between gap-3 group">
+                        <div onclick="selectHistoryDate('${dateStr}')" class="cursor-pointer flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold text-sm theme-text-primary">${item.hari || ''}, ${formatDateIndo(dateStr)}</span>
+                                ${item.mood ? `<span class="text-xs px-2 py-0.5 theme-card theme-text-secondary truncate max-w-[140px]">${item.mood}</span>` : ''}
+                            </div>
+                            <p class="text-xs theme-text-muted truncate mt-1">${preview}</p>
+                        </div>
+                        <button onclick="deleteEntry('${dateStr}')" title="Hapus catatan" class="p-2 theme-text-muted hover:text-rose-500 transition">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectHistoryDate(dateStr) {
+            document.getElementById('tanggal').value = dateStr;
+            onDateChange();
+            toggleHistoryModal();
+            showToast(`Memuat catatan ${formatDateIndo(dateStr)}`, '📂');
+        }
+
+        function deleteEntry(dateStr) {
+            const allEntries = getAllEntries();
+            delete allEntries[dateStr];
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(allEntries));
+            renderHistoryList();
+            if (document.getElementById('tanggal').value === dateStr) {
+                loadEntryByDate(dateStr);
+            }
+            showToast('Catatan dihapus', '🗑️');
+        }
+
+        // Ekspor cadangan JSON
+        function exportAllJSON() {
+            const allEntries = getAllEntries();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allEntries, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `backup_jurnal_harian_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast('File cadangan berhasil diunduh!', '📥');
+        }
+
+        // Tampilkan Toast Notifikasi
+        let toastTimer;
+        function showToast(message, icon = '✅') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            document.getElementById('toast-icon').textContent = icon;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2800);
+        }
+    </script>
+</body>
+</html>
