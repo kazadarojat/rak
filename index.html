@@ -193,9 +193,13 @@
             <div id="history-list" class="p-5 overflow-y-auto space-y-2.5 flex-1">
                 <!-- Daftar riwayat akan dimuat di sini -->
             </div>
-            <div class="p-4 border-t theme-border-sub flex justify-between items-center text-xs theme-text-muted">
+            <div class="p-4 border-t theme-border-sub flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 text-xs theme-text-muted">
                 <span id="total-entries">0 Catatan tersimpan</span>
-                <button onclick="exportAllJSON()" class="theme-text-primary font-medium hover:underline">Unduh Cadangan (.json)</button>
+                <div class="flex flex-wrap items-center gap-2">
+                    <input type="file" id="import-json-file" accept=".json,application/json" class="hidden" onchange="importJSONFile(event)">
+                    <button type="button" onclick="document.getElementById('import-json-file').click()" class="theme-badge border px-3 py-2 font-medium transition hover:opacity-80">📤 Impor JSON</button>
+                    <button type="button" onclick="exportAllJSON()" class="theme-text-primary font-medium hover:underline px-2 py-2">Unduh Cadangan (.json)</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1161,6 +1165,124 @@ ${val('kurang_hari_ini')}
             downloadAnchor.click();
             downloadAnchor.remove();
             showToast('File cadangan berhasil diunduh!', '📥');
+        }
+
+        // Validasi tanggal arsip dalam format YYYY-MM-DD
+        function isValidDateKey(dateStr) {
+            if (typeof dateStr !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(dateStr)) return false;
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const dateObj = new Date(year, month - 1, day);
+            return getLocalDateString(dateObj) === dateStr;
+        }
+
+        // Impor arsip JSON: mendukung format ekspor lama dan format dengan metadata/entries
+        function importJSONFile(event) {
+            const input = event.target;
+            const file = input.files && input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = () => {
+                try {
+                    const parsed = JSON.parse(String(reader.result || ''));
+                    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+                        throw new Error('Struktur file JSON tidak sesuai.');
+                    }
+
+                    if (parsed.app && parsed.app !== 'Rerana') {
+                        throw new Error('File ini bukan arsip Rerana.');
+                    }
+
+                    const sourceEntries = parsed.entries && typeof parsed.entries === 'object' && !Array.isArray(parsed.entries)
+                        ? parsed.entries
+                        : parsed;
+
+                    const importedEntries = {};
+                    const sourceDates = Object.keys(sourceEntries).filter(key => key !== 'app' && key !== 'schemaVersion' && key !== 'exportedAt');
+
+                    if (sourceDates.length === 0) {
+                        throw new Error('Tidak ada catatan yang ditemukan dalam file.');
+                    }
+
+                    sourceDates.forEach(dateStr => {
+                        const rawEntry = sourceEntries[dateStr];
+                        if (!isValidDateKey(dateStr) || !rawEntry || typeof rawEntry !== 'object' || Array.isArray(rawEntry)) {
+                            throw new Error('Ada tanggal atau struktur catatan yang tidak valid. Tidak ada data yang diimpor.');
+                        }
+
+                        const entry = {};
+                        FIELD_IDS.forEach(id => {
+                            if (id === 'tanggal') {
+                                entry[id] = dateStr;
+                                return;
+                            }
+
+                            const value = rawEntry[id];
+                            entry[id] = (typeof value === 'string' || typeof value === 'number') ? String(value) : '';
+                        });
+
+                        if (!entry.hari) {
+                            const [year, month, day] = dateStr.split('-').map(Number);
+                            entry.hari = HARI_INDO[new Date(year, month - 1, day).getDay()];
+                        }
+
+                        importedEntries[dateStr] = entry;
+                    });
+
+                    const currentEntries = getAllEntries();
+                    const dates = Object.keys(importedEntries);
+                    const conflicts = dates.filter(dateStr => Object.prototype.hasOwnProperty.call(currentEntries, dateStr));
+                    let replaceConflicts = false;
+
+                    if (conflicts.length > 0) {
+                        replaceConflicts = window.confirm(
+                            `Arsip berisi ${dates.length} catatan.\\n\\n${conflicts.length} tanggal sudah memiliki catatan di perangkat ini.\\n\\nPilih OK untuk mengganti catatan pada tanggal yang sama.\\nPilih Batal untuk mempertahankan catatan lama dan hanya mengimpor tanggal yang belum ada.`
+                        );
+                    }
+
+                    const mergedEntries = { ...currentEntries };
+                    let added = 0;
+                    let replaced = 0;
+                    let skipped = 0;
+
+                    dates.forEach(dateStr => {
+                        if (Object.prototype.hasOwnProperty.call(currentEntries, dateStr)) {
+                            if (replaceConflicts) {
+                                mergedEntries[dateStr] = importedEntries[dateStr];
+                                replaced++;
+                            } else {
+                                skipped++;
+                            }
+                        } else {
+                            mergedEntries[dateStr] = importedEntries[dateStr];
+                            added++;
+                        }
+                    });
+
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedEntries));
+
+                    const activeDate = document.getElementById('tanggal').value;
+                    if (activeDate && mergedEntries[activeDate]) {
+                        loadEntryByDate(activeDate, mergedEntries[activeDate].hari);
+                    }
+
+                    renderHistoryList();
+                    showToast(`Impor selesai: ${added} baru, ${replaced} diganti, ${skipped} dilewati`, '📥');
+                } catch (error) {
+                    console.error('Gagal mengimpor arsip Rerana:', error);
+                    showToast(error.message || 'File JSON tidak valid atau gagal dibaca.', '❌');
+                } finally {
+                    input.value = '';
+                }
+            };
+
+            reader.onerror = () => {
+                showToast('File gagal dibaca. Coba pilih ulang.', '❌');
+                input.value = '';
+            };
+
+            reader.readAsText(file);
         }
 
         // Tampilkan Toast Notifikasi
