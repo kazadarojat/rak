@@ -1169,7 +1169,7 @@ ${val('kurang_hari_ini')}
 
         // Validasi tanggal arsip dalam format YYYY-MM-DD
         function isValidDateKey(dateStr) {
-            if (typeof dateStr !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(dateStr)) return false;
+            if (typeof dateStr !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
             const [year, month, day] = dateStr.split('-').map(Number);
             const dateObj = new Date(year, month - 1, day);
             return getLocalDateString(dateObj) === dateStr;
@@ -1237,7 +1237,7 @@ ${val('kurang_hari_ini')}
 
                     if (conflicts.length > 0) {
                         replaceConflicts = window.confirm(
-                            `Arsip berisi ${dates.length} catatan.\\n\\n${conflicts.length} tanggal sudah memiliki catatan di perangkat ini.\\n\\nPilih OK untuk mengganti catatan pada tanggal yang sama.\\nPilih Batal untuk mempertahankan catatan lama dan hanya mengimpor tanggal yang belum ada.`
+                            `Arsip berisi ${dates.length} catatan.\n\n${conflicts.length} tanggal sudah memiliki catatan di perangkat ini.\n\nPilih OK untuk mengganti catatan pada tanggal yang sama.\nPilih Batal untuk mempertahankan catatan lama dan hanya mengimpor tanggal yang belum ada.`
                         );
                     }
 
