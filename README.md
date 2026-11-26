@@ -6,6 +6,8 @@ Rerana dirancang sebagai aplikasi statis yang dapat dijalankan melalui GitHub Pa
 
 **Aplikasi:** https://kazadarojat.github.io/rak/  
 **Repository:** https://github.com/kazadarojat/rak
+<img width="2124" height="740" alt="image" src="https://github.com/user-attachments/assets/60d26c61-3727-4a40-bf5f-7ad9254d5405" />
+
 
 ---
 
